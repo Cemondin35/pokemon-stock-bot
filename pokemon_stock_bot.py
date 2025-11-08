@@ -5,8 +5,10 @@ import json
 import time
 from datetime import datetime
 
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # Railway'e eklenecek ortam değişkeni
+# ✅ Discord Webhook URL (doğrudan ekledik)
+WEBHOOK_URL = "https://discord.com/api/webhooks/1436445960099205230/nkq2y6CUBF3r8CkSNjG_anH1zxTrTI7XBWVW-wMINmnE2WkEI8yow_yPK4NKP5DPMeaJ"
 
+# ✅ İzlenecek mağazalar
 URLS = [
     "https://oryx.ie/collections/pokemon-sealed-product",
     "https://gadgetman.ie/339-pokemon-ireland",
@@ -85,15 +87,15 @@ def main():
             new_products = scrape_site(url)
             old_products = data.get(site_name, {})
 
-            added = {k:v for k,v in new_products.items() if k not in old_products}
-            removed = {k:v for k,v in old_products.items() if k not in new_products}
+            added = {k: v for k, v in new_products.items() if k not in old_products}
+            removed = {k: v for k, v in old_products.items() if k not in new_products}
 
             for name, link in added.items():
                 print("🆕 New:", name)
                 send_discord_message(name, link, site_name, "🆕 New")
 
             for name, link in removed.items():
-                print(♻️ Removed or out of stock:", name)
+                print("♻️ Removed or out of stock:", name)
                 send_discord_message(name, link, site_name, "♻️ Stock Update")
 
             data[site_name] = new_products
