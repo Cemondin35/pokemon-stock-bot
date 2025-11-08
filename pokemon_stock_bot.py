@@ -5,10 +5,8 @@ import json
 import time
 from datetime import datetime
 
-# ✅ Discord Webhook URL (doğrudan ekledik)
 WEBHOOK_URL = "https://discord.com/api/webhooks/1436445960099205230/nkq2y6CUBF3r8CkSNjG_anH1zxTrTI7XBWVW-wMINmnE2WkEI8yow_yPK4NKP5DPMeaJ"
 
-# ✅ İzlenecek mağazalar
 URLS = [
     "https://oryx.ie/collections/pokemon-sealed-product",
     "https://gadgetman.ie/339-pokemon-ireland",
@@ -30,6 +28,7 @@ URLS = [
 
 DATA_FILE = "products.json"
 
+
 def load_previous_data():
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -37,9 +36,11 @@ def load_previous_data():
     except FileNotFoundError:
         return {}
 
+
 def save_data(data):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
+
 
 def send_discord_message(title, link, site, change_type):
     if not WEBHOOK_URL:
@@ -59,31 +60,35 @@ def send_discord_message(title, link, site, change_type):
     except Exception as e:
         print("Error sending Discord message:", e)
 
+
 def scrape_site(url):
     headers = {"User-Agent": "Mozilla/5.0 (X11; Windows NT 10.0; Win64; x64)"}
     try:
         r = requests.get(url, headers=headers, timeout=15)
         soup = BeautifulSoup(r.text, "html.parser")
         products = {}
+
         for a in soup.find_all("a", href=True):
-    name = a.get_text(strip=True)
-    href = a["href"]
+            name = a.get_text(strip=True)
+            href = a["href"]
 
-    # Boş, çok kısa veya buton tarzı metinleri atla
-    if not name or len(name) < 4:
-        continue
-    if any(x in name.lower() for x in ["sort", "clear", "filter", "next", "remove", "price", "relevance", "name,"]):
-        continue
+            # Boş, çok kısa veya buton tarzı metinleri atla
+            if not name or len(name) < 4:
+                continue
+            if any(x in name.lower() for x in ["sort", "clear", "filter", "next", "remove", "price", "relevance", "name,"]):
+                continue
 
-    # Gerçek Pokémon ürünleriyle ilgili linkleri al
-    if "pokemon" in name.lower() or "pokemon" in href.lower():
-        full_link = href if href.startswith("http") else (url.rstrip("/") + "/" + href.lstrip("/"))
-        products[name] = full_link
+            # Gerçek Pokémon ürünleriyle ilgili linkleri al
+            if "pokemon" in name.lower() or "pokemon" in href.lower():
+                full_link = href if href.startswith("http") else (url.rstrip("/") + "/" + href.lstrip("/"))
+                products[name] = full_link
 
         return products
+
     except Exception as e:
         print(f"Error scraping {url}: {e}")
         return {}
+
 
 def main():
     data = load_previous_data()
@@ -111,6 +116,6 @@ def main():
         print("Sleeping 15 minutes...\n")
         time.sleep(900)
 
+
 if __name__ == "__main__":
     main()
-
