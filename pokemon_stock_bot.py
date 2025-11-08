@@ -66,13 +66,20 @@ def scrape_site(url):
         soup = BeautifulSoup(r.text, "html.parser")
         products = {}
         for a in soup.find_all("a", href=True):
-            name = a.get_text(strip=True)
-            href = a["href"]
-            if not name:
-                continue
-            if "pokemon" in name.lower() or "pokemon" in href.lower():
-                full_link = href if href.startswith("http") else (url.rstrip("/") + "/" + href.lstrip("/"))
-                products[name] = full_link
+    name = a.get_text(strip=True)
+    href = a["href"]
+
+    # Boş, çok kısa veya buton tarzı metinleri atla
+    if not name or len(name) < 4:
+        continue
+    if any(x in name.lower() for x in ["sort", "clear", "filter", "next", "remove", "price", "relevance", "name,"]):
+        continue
+
+    # Gerçek Pokémon ürünleriyle ilgili linkleri al
+    if "pokemon" in name.lower() or "pokemon" in href.lower():
+        full_link = href if href.startswith("http") else (url.rstrip("/") + "/" + href.lstrip("/"))
+        products[name] = full_link
+
         return products
     except Exception as e:
         print(f"Error scraping {url}: {e}")
@@ -106,3 +113,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
